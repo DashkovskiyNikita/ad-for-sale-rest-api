@@ -4,19 +4,21 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import com.example.plugins.*
+import com.example.utils.Env
 
 fun main() {
     embeddedServer(
         factory = Netty,
-        port = 8080,
-        host = "0.0.0.0",
+        port = Env.PORT,
+        host = Env.HOST,
         module = Application::module
     ).start(wait = true)
 }
 
 fun Application.module() {
     configureSerialization()
-    configureDatabases()
+    configureDatabase()
     configureSecurity()
     configureRouting()
+    configureKoin()
 }
