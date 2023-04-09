@@ -1,0 +1,1 @@
+rootProject.name = "com.example.ad-for-sale-rest-api"
