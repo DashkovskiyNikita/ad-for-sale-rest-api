@@ -1,5 +1,6 @@
 package com.example.utils
 
+import java.security.SecureRandom
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.SecretKey
@@ -8,6 +9,12 @@ import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
 
 object CryptUtils {
+    fun generateSalt(size: Int = 16): String {
+        val random = SecureRandom()
+        val bytes = ByteArray(size)
+        random.nextBytes(bytes)
+        return Base64.getEncoder().encodeToString(bytes)
+    }
 
     fun createKey(secret: String, salt: String): SecretKey {
         val keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")

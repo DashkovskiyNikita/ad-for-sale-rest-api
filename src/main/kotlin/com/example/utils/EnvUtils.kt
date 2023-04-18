@@ -14,4 +14,7 @@ object Env {
     val JWT_ISSUER: String = System.getenv("JWT_ISSUER")
     val JWT_SECRET: String = System.getenv("JWT_SECRET")
 
+    val PWD_SECRET: String = System.getenv("PWD_SECRET")
+    val PWD_SALT: String = System.getenv("PWD_SALT")
+
 }

@@ -1,6 +1,8 @@
 package com.example.routes
 
 import com.example.repositories.AuthRepository
+import com.example.utils.CryptUtils
+import com.example.utils.Env
 import com.example.utils.JwtConfig
 import com.example.utils.JwtUtils
 import io.ktor.http.*
@@ -74,9 +76,15 @@ fun Route.authRouting() {
     val authRepository by inject<AuthRepository>()
 
     post<User.Login> {
+
         val request = call.receive<LoginRequest>()
-        val user = authRepository.getUserByLogin(login = request.login)
-        if (user?.password == request.password) {
+
+        val user = authRepository.getUserByLogin(login = request.login) ?: throw Exception()
+
+        val key = CryptUtils.createKey(secret = Env.PWD_SECRET, salt = Env.PWD_SALT)
+        val decryptedPwd = CryptUtils.decrypt(data = user.password, key = key)
+
+        if (decryptedPwd == request.password) {
             val access = JwtUtils.generate(config = accessConfig, "id" to user.id.value)
             val refresh = JwtUtils.generate(config = refreshConfig)
             val response = TokenResponse(access = access, refresh = refresh)
@@ -89,11 +97,19 @@ fun Route.authRouting() {
         val request = call.receive<RegisterRequest>()
         val user = authRepository.getUserByPhoneOrEmail(phone = request.phone, email = request.email)
         if (user == null) {
-            val newUserId = authRepository.insertUser(request)
+
+            val key = CryptUtils.createKey(secret = Env.PWD_SECRET, salt = Env.PWD_SALT)
+            val encryptedPwd = CryptUtils.encrypt(data = request.password,key = key)
+
+            val userWithHashedPwd = request.copy(password = encryptedPwd)
+            val newUserId = authRepository.insertUser(userWithHashedPwd)
+
             val access = JwtUtils.generate(config = accessConfig, "id" to newUserId)
             val refresh = JwtUtils.generate(config = refreshConfig)
+
             val response = TokenResponse(access = access, refresh = refresh)
             call.respond(HttpStatusCode.OK, response)
+
         } else {
             call.respond(HttpStatusCode.BadRequest, "User with specified phone or email already exists")
         }
