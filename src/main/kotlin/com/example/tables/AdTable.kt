@@ -6,7 +6,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.javatime.datetime
 
-object Ad : IntIdTable() {
+object AdTable : IntIdTable() {
     val author = reference("author", UserTable)
     val title = varchar("title", 64)
     val description = varchar("description", 5000)
@@ -16,12 +16,12 @@ object Ad : IntIdTable() {
 }
 
 class AdEntity(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<AdEntity>(Ad)
+    companion object : IntEntityClass<AdEntity>(AdTable)
 
-    var author by UserEntity referencedOn Ad.author
-    var title by Ad.title
-    var description by Ad.description
-    var createdAt by Ad.createdAt
-    var price by Ad.price
-    var currency by Ad.currency
+    var author by UserEntity referencedOn AdTable.author
+    var title by AdTable.title
+    var description by AdTable.description
+    var createdAt by AdTable.createdAt
+    var price by AdTable.price
+    var currency by AdTable.currency
 }

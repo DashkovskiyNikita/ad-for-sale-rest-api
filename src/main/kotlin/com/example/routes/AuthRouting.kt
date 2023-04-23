@@ -1,10 +1,7 @@
 package com.example.routes
 
 import com.example.repositories.AuthRepository
-import com.example.utils.CryptUtils
-import com.example.utils.Env
-import com.example.utils.JwtConfig
-import com.example.utils.JwtUtils
+import com.example.utils.*
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
@@ -16,6 +13,7 @@ import io.ktor.server.resources.post
 import io.ktor.server.resources.put
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.pipeline.*
 import kotlinx.serialization.Serializable
 import org.koin.core.qualifier.named
 import org.koin.ktor.ext.inject
@@ -71,18 +69,18 @@ object User {
 
 fun Route.authRouting() {
 
-    val accessConfig by inject<JwtConfig>(qualifier = named("access"))
-    val refreshConfig by inject<JwtConfig>(qualifier = named("refresh"))
-    val authRepository by inject<AuthRepository>()
+    val accessConfig: JwtConfig by inject(qualifier = named("access"))
+    val refreshConfig: JwtConfig by inject(qualifier = named("refresh"))
+    val authRepository: AuthRepository by inject()
 
     post<User.Login> {
 
         val request = call.receive<LoginRequest>()
 
-        val user = authRepository.getUserByLogin(login = request.login) ?: throw Exception()
+        val user = authRepository.getUserByLogin(login = request.login)
+            ?: throw Exception("Wrong login or password")
 
-        val key = CryptUtils.createKey(secret = Env.PWD_SECRET, salt = Env.PWD_SALT)
-        val decryptedPwd = CryptUtils.decrypt(data = user.password, key = key)
+        val decryptedPwd = PwdUtils.decrypt(pwd = user.password)
 
         if (decryptedPwd == request.password) {
             val access = JwtUtils.generate(config = accessConfig, "id" to user.id.value)
@@ -98,8 +96,7 @@ fun Route.authRouting() {
         val user = authRepository.getUserByPhoneOrEmail(phone = request.phone, email = request.email)
         if (user == null) {
 
-            val key = CryptUtils.createKey(secret = Env.PWD_SECRET, salt = Env.PWD_SALT)
-            val encryptedPwd = CryptUtils.encrypt(data = request.password,key = key)
+            val encryptedPwd = PwdUtils.encrypt(pwd = request.password)
 
             val userWithHashedPwd = request.copy(password = encryptedPwd)
             val newUserId = authRepository.insertUser(userWithHashedPwd)
@@ -116,7 +113,7 @@ fun Route.authRouting() {
     }
     authenticate {
         post<User.Refresh> {
-            val principal = call.principal<JWTPrincipal>() ?: return@post
+            val principal = call.getPrincipalOrThrow()
             val access = JwtUtils.generate(
                 config = accessConfig,
                 "id" to principal.payload.getClaim("id").asInt()
@@ -126,7 +123,7 @@ fun Route.authRouting() {
             call.respond(HttpStatusCode.OK, response)
         }
         put<User.Update> {
-            val principal = call.principal<JWTPrincipal>() ?: return@put
+            val principal = call.getPrincipalOrThrow()
             val request = call.receive<RegisterRequest>()
             authRepository.updateUser(
                 id = principal.payload.getClaim("id").asInt(),
@@ -135,10 +132,14 @@ fun Route.authRouting() {
             call.respond(HttpStatusCode.OK)
         }
         delete<User.Delete> {
-            val principal = call.principal<JWTPrincipal>() ?: return@delete
+            val principal = call.getPrincipalOrThrow()
             authRepository.deleteAccount(id = principal.payload.getClaim("id").asInt())
             call.respond(HttpStatusCode.OK)
         }
     }
 
+}
+
+fun ApplicationCall.getPrincipalOrThrow(): JWTPrincipal {
+    return principal() ?: throw Exception("Invalid principal")
 }
