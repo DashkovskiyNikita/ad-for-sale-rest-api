@@ -13,6 +13,6 @@ object ImageTable : IntIdTable() {
 class ImageEntity(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ImageEntity>(ImageTable)
 
-    var adId by AdEntity referencedOn ImageTable.ad
+    var ad by AdEntity referencedOn ImageTable.ad
     var fileName by ImageTable.fileName
 }
