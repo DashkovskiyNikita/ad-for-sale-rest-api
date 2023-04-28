@@ -14,6 +14,8 @@ interface AdRepository {
     suspend fun getAllAdsByUserId(userId: Int): List<AdEntity>
     suspend fun getAdsByPage(page: Int): List<AdEntity>
     suspend fun deleteAdById(id: Int)
+
+    suspend fun searchAd(pattern : String) : List<AdEntity>
 }
 
 class AdRepositoryImpl(
@@ -49,6 +51,11 @@ class AdRepositoryImpl(
     override suspend fun deleteAdById(id: Int) =
         newSuspendedTransaction(dispatcher) {
             AdEntity.findById(id)?.let(AdEntity::delete) ?: throw Exception()
+        }
+
+    override suspend fun searchAd(pattern: String) =
+        newSuspendedTransaction(dispatcher) {
+            AdEntity.find { AdTable.title eq "$pattern%" }.toList()
         }
 
 }

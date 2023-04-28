@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 
 interface ImageRepository {
     suspend fun insertImage(adId: Int, fileName: String): Int
+    suspend fun getImageById(id: Int): ImageEntity
     suspend fun deleteImageById(id: Int)
 }
 
@@ -21,6 +22,11 @@ class ImageRepositoryImpl(
                 ad = AdEntity.findById(adId) ?: throw Exception()
                 this.fileName = fileName
             }.id.value
+        }
+
+    override suspend fun getImageById(id: Int) =
+        newSuspendedTransaction(dispatcher) {
+            ImageEntity.findById(id) ?: throw Exception()
         }
 
     override suspend fun deleteImageById(id: Int) =

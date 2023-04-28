@@ -10,7 +10,7 @@ object UserTable : IntIdTable() {
     val surname = varchar("surname", 64)
     val password = varchar("password", 128)
     val phone = varchar("phone", 16)
-    val email = varchar("phone", 256).nullable()
+    val email = varchar("email", 256).nullable()
 }
 
 class UserEntity(id: EntityID<Int>) : IntEntity(id) {
