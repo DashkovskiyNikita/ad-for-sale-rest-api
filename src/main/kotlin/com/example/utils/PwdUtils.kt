@@ -5,13 +5,13 @@ object PwdUtils {
     fun encrypt(pwd: String): String {
         val key = CryptUtils.createKey(secret = Env.PWD_SECRET, salt = Env.PWD_SALT)
         val salt = CryptUtils.generateSalt()
-        return CryptUtils.decrypt(data = "$pwd$salt", key = key)
+        return CryptUtils.encrypt(data = "$pwd$salt", key = key)
 
     }
 
     fun decrypt(pwd: String): String {
         val key = CryptUtils.createKey(secret = Env.PWD_SECRET, salt = Env.PWD_SALT)
-        val encryptedPwd = CryptUtils.encrypt(data = pwd, key = key)
+        val encryptedPwd = CryptUtils.decrypt(data = pwd, key = key)
         return encryptedPwd.dropLast(24)
     }
 }
