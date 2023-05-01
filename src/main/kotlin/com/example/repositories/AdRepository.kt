@@ -12,10 +12,10 @@ import java.time.LocalDateTime
 interface AdRepository {
     suspend fun insertAd(userId: Int, adRequest: AdRequest): Int
     suspend fun getAllAdsByUserId(userId: Int): List<AdEntity>
-    suspend fun getAdsByPage(page: Int): List<AdEntity>
+    suspend fun getAds(page: Int?): List<AdEntity>
     suspend fun deleteAdById(id: Int)
-
-    suspend fun searchAd(pattern : String) : List<AdEntity>
+    suspend fun searchAd(pattern: String): List<AdEntity>
+    suspend fun updateAd(id : Int,adRequest: AdRequest)
 }
 
 class AdRepositoryImpl(
@@ -40,12 +40,16 @@ class AdRepositoryImpl(
             AdEntity.find { AdTable.author eq user.id }.toList()
         }
 
-    override suspend fun getAdsByPage(page: Int) =
+    override suspend fun getAds(page: Int?) =
         newSuspendedTransaction(dispatcher) {
-            AdEntity
-                .all()
-                .chunked(25)
-                .getOrElse(page) { emptyList() }
+            if (page != null) {
+                AdEntity
+                    .all()
+                    .chunked(25)
+                    .getOrElse(page) { emptyList() }
+            } else {
+                AdEntity.all().toList()
+            }
         }
 
     override suspend fun deleteAdById(id: Int) =
@@ -56,6 +60,17 @@ class AdRepositoryImpl(
     override suspend fun searchAd(pattern: String) =
         newSuspendedTransaction(dispatcher) {
             AdEntity.find { AdTable.title eq "$pattern%" }.toList()
+        }
+
+    override suspend fun updateAd(id : Int,adRequest: AdRequest) =
+        newSuspendedTransaction {
+            val ad = AdEntity.findById(id = id) ?: throw Exception()
+            with(ad){
+                title = adRequest.title
+                description = adRequest.description
+                price = adRequest.price
+                currency = adRequest.currency
+            }
         }
 
 }

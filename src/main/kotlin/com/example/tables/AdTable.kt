@@ -1,5 +1,6 @@
 package com.example.tables
 
+import com.example.routes.AdResponse
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -25,3 +26,14 @@ class AdEntity(id: EntityID<Int>) : IntEntity(id) {
     var price by AdTable.price
     var currency by AdTable.currency
 }
+
+fun AdEntity.mapToResponse() =
+    AdResponse(
+        id = id.value,
+        title = title,
+        description = description,
+        createdAt = createdAt.toString(),
+        price = price,
+        currency = currency
+    )
+

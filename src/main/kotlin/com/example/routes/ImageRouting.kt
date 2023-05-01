@@ -13,6 +13,7 @@ import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
+import org.koin.ktor.ext.inject
 import java.io.File
 import java.util.UUID
 
@@ -25,11 +26,13 @@ class GetImage(val fileName: String)
 @Resource("/image/{id}")
 class DeleteImage(val id: Int)
 
-fun Route.imageRouting(imageRepository: ImageRepository) {
+fun Route.imageRouting() {
+
+    val imageRepository : ImageRepository by inject()
+
     authenticate {
         post<PostImage> { param ->
             //todo check if user owns ad's id
-            val principal = call.getPrincipalOrThrow()
             val imageDirectory = File(Constants.IMAGE_FOLDER)
             if (!imageDirectory.exists()) imageDirectory.mkdir()
             val fileName = UUID.randomUUID().toString()
@@ -39,8 +42,6 @@ fun Route.imageRouting(imageRepository: ImageRepository) {
             call.respond(HttpStatusCode.OK)
         }
         delete<DeleteImage> { param ->
-            //todo check if user owns image
-            val principal = call.getPrincipalOrThrow()
             val image = imageRepository.getImageById(id = param.id)
             File("${Constants.IMAGE_FOLDER}/${image.fileName}").delete()
             imageRepository.deleteImageById(id = param.id)
