@@ -9,10 +9,8 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.resources.*
-import io.ktor.server.resources.post
-import io.ktor.server.resources.put
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.routing.Route
 import io.ktor.util.pipeline.*
 import kotlinx.serialization.Serializable
 import org.koin.core.qualifier.named
@@ -48,22 +46,22 @@ data class TokenResponse(
 )
 
 @Resource("/user")
-object User {
+class User {
 
-    @Resource("/login")
-    object Login
+    @Resource("login")
+    class Login(val user: User = User())
 
-    @Resource("/register")
-    object Register
+    @Resource("register")
+    class Register(val user: User = User())
 
-    @Resource("/update")
-    object Update
+    @Resource("update")
+    class Update(val user: User = User())
 
-    @Resource("/delete")
-    object Delete
+    @Resource("delete")
+    class Delete(val user: User = User())
 
-    @Resource("/refresh")
-    object Refresh
+    @Resource("refresh")
+    class Refresh(val user: User = User())
 
 }
 

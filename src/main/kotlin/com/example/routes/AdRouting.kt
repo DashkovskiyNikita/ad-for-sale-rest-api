@@ -38,24 +38,24 @@ data class AdResponse(
 )
 
 @Resource("user/ad")
-object UserAd {
+class UserAd {
 
     @Resource("/{id}")
-    class Id(val id: Int)
+    class Id(val userAd: UserAd = UserAd(), val id: Int)
 
     @Resource("/all")
-    object All
+    class All(val userAd: UserAd = UserAd())
 
 }
 
 @Resource("/ad")
-object Ad {
+class Ad {
 
     @Resource("/all")
-    class All(val page: Int? = null)
+    class All(val ad: Ad = Ad(), val page: Int? = null)
 
     @Resource("/search/{query}")
-    class Search(val query: String)
+    class Search(val ad: Ad = Ad(), val query: String)
 }
 
 fun Route.adRouting() {

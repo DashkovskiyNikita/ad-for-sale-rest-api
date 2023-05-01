@@ -1,10 +1,12 @@
 package com.example
 
+import com.example.plugins.*
+import com.example.utils.Env
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import com.example.plugins.*
-import com.example.utils.Env
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.resources.*
 
 fun main() {
     embeddedServer(
@@ -16,9 +18,12 @@ fun main() {
 }
 
 fun Application.module() {
+    configureCORS()
+    install(Resources)
+    configureKoin()
     configureSerialization()
     configureDatabase()
     configureSecurity()
     configureRouting()
-    configureKoin()
+    install(StatusPages)
 }

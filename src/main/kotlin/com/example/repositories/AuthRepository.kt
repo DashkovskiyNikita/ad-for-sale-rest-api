@@ -4,8 +4,6 @@ import com.example.routes.RegisterRequest
 import com.example.routes.UserInfoResponse
 import com.example.tables.UserEntity
 import com.example.tables.UserTable
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
@@ -18,11 +16,9 @@ interface AuthRepository {
     suspend fun deleteAccount(id: Int)
 }
 
-class AuthRepositoryImpl(
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
-) : AuthRepository {
+class AuthRepositoryImpl : AuthRepository {
     override suspend fun getUserByLogin(login: String) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             val user = UserEntity.find {
                 (UserTable.email eq login) or (UserTable.phone eq login)
             }
@@ -30,7 +26,7 @@ class AuthRepositoryImpl(
         }
 
     override suspend fun getUserByPhoneOrEmail(phone: String, email: String) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             val user = UserEntity.find {
                 (UserTable.email eq email) or (UserTable.phone eq phone)
             }
@@ -38,7 +34,7 @@ class AuthRepositoryImpl(
         }
 
     override suspend fun insertUser(request: RegisterRequest) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
 
             val newUser = UserEntity.new {
                 name = request.name
@@ -53,7 +49,7 @@ class AuthRepositoryImpl(
         }
 
     override suspend fun getUserById(id: Int) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             val user = UserEntity.findById(id)
                 ?: throw Exception("User with id : $id not found")
 
@@ -67,7 +63,7 @@ class AuthRepositoryImpl(
 
 
     override suspend fun updateUser(id: Int, request: RegisterRequest) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             val user = UserEntity.findById(id)
                 ?: throw Exception("User with id : $id not found")
 
@@ -82,7 +78,7 @@ class AuthRepositoryImpl(
         }
 
     override suspend fun deleteAccount(id: Int) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             UserEntity.findById(id)?.let(UserEntity::delete)
                 ?: throw Exception("User with id : $id not found")
         }

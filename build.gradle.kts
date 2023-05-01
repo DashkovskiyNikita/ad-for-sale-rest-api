@@ -14,6 +14,7 @@ plugins {
 
 group = "com.example"
 version = "0.0.1"
+
 application {
     mainClass.set("com.example.ApplicationKt")
 
@@ -30,6 +31,8 @@ dependencies {
     implementation("io.ktor:ktor-server-resources:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
+    implementation("io.ktor:ktor-server-cors:$ktorVersion")
     implementation("org.postgresql:postgresql:$postgresVersion")
     implementation("com.h2database:h2:$h2Version")
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

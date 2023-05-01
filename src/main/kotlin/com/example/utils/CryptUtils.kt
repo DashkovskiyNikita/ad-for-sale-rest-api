@@ -19,7 +19,7 @@ object CryptUtils {
     fun createKey(secret: String, salt: String): SecretKey {
         val keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
         val keySpec = PBEKeySpec(secret.toCharArray(), salt.toByteArray(), 65536, 256)
-        return SecretKeySpec(keyFactory.generateSecret(keySpec).encoded, "AEC")
+        return SecretKeySpec(keyFactory.generateSecret(keySpec).encoded, "AES")
     }
 
     fun decrypt(data: String, key: SecretKey): String {

@@ -6,11 +6,12 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.example.utils.JwtConfig
 import io.ktor.server.application.*
+import org.koin.core.qualifier.named
 import org.koin.ktor.ext.inject
 
 fun Application.configureSecurity() {
 
-    val jwtConfig: JwtConfig by inject()
+    val jwtConfig: JwtConfig by inject(qualifier = named("access"))
 
     authentication {
         jwt {
