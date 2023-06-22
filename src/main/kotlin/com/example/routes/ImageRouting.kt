@@ -32,9 +32,6 @@ fun Route.imageRouting() {
 
     authenticate {
         post<PostImage> { param ->
-            //todo check if user owns ad's id
-            val imageDirectory = File(Constants.IMAGE_FOLDER)
-            if (!imageDirectory.exists()) imageDirectory.mkdir()
             val fileName = UUID.randomUUID().toString()
             val file = File("${Constants.IMAGE_FOLDER}/$fileName.jpg")
             call.receiveChannel().copyAndClose(file.writeChannel())
@@ -45,7 +42,7 @@ fun Route.imageRouting() {
             val image = imageRepository.getImageById(id = param.id)
             File("${Constants.IMAGE_FOLDER}/${image.fileName}").delete()
             imageRepository.deleteImageById(id = param.id)
-
+            call.respond(HttpStatusCode.OK)
         }
     }
     get<GetImage> { param ->

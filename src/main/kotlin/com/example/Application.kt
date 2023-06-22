@@ -25,5 +25,6 @@ fun Application.module() {
     configureDatabase()
     configureSecurity()
     configureRouting()
+    configureFolders()
     install(StatusPages)
 }

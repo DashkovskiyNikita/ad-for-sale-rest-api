@@ -5,6 +5,7 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object FavoriteTable : IntIdTable() {
     val user = reference("user", UserTable)
@@ -18,8 +19,8 @@ class FavoriteEntity(id: EntityID<Int>) : IntEntity(id) {
     var ad by AdEntity referencedOn FavoriteTable.ad
 }
 
-fun FavoriteEntity.mapToResponse() =
+fun FavoriteEntity.mapToUserAdResponse() =
     Favorite(
         id = id.value,
-        ad = ad.mapToResponse()
+        ad =  transaction { ad.mapToUserAdResponse() }
     )

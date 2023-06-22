@@ -2,7 +2,7 @@ package com.example.routes
 
 import com.example.repositories.FavoriteRepository
 import com.example.tables.FavoriteEntity
-import com.example.tables.mapToResponse
+import com.example.tables.mapToUserAdResponse
 import io.ktor.http.*
 import io.ktor.resources.*
 import io.ktor.server.application.*
@@ -20,13 +20,16 @@ class NewFavorite(val id: Int)
 @Resource("user/favorite/{id}")
 class DeleteFavorite(val id: Int)
 
-@Resource("favorite/all")
+@Resource("user/ad/{id}/favorite")
+class DeleteFavoriteByAdId(val id : Int)
+
+@Resource("user/favorites")
 object GetFavorites
 
 @Serializable
 data class Favorite(
     val id: Int,
-    val ad: AdResponse
+    val ad: UserAdResponse
 )
 
 fun Route.favoriteRouting() {
@@ -44,11 +47,15 @@ fun Route.favoriteRouting() {
             val principal = call.getPrincipalOrThrow()
             val userId = principal.payload.getClaim("id").asInt()
             val favorites = favoriteRepository.getAllFavoritesByUser(userId = userId)
-            val response = favorites.map(FavoriteEntity::mapToResponse)
+            val response = favorites.map(FavoriteEntity::mapToUserAdResponse)
             call.respond(HttpStatusCode.OK, response)
         }
         delete<DeleteFavorite> { param ->
-            favoriteRepository.deleteFavorite(adId = param.id)
+            favoriteRepository.deleteFavorite(id = param.id)
+            call.respond(HttpStatusCode.OK)
+        }
+        delete<DeleteFavoriteByAdId>{ param ->
+            favoriteRepository.deleteFavoriteByAdId(adId = param.id)
             call.respond(HttpStatusCode.OK)
         }
     }

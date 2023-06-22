@@ -22,7 +22,7 @@ fun Application.configureSecurity() {
                     .build()
             )
             validate { credential ->
-                if (credential.payload.audience.contains(jwtConfig.audience))
+                if (credential.payload.expiresAt.time > System.currentTimeMillis())
                     JWTPrincipal(credential.payload)
                 else
                     null

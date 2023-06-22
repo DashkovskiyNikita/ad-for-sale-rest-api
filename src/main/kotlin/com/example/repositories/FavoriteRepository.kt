@@ -7,7 +7,9 @@ interface FavoriteRepository {
     suspend fun insertFavorite(userId: Int, adId: Int): FavoriteEntity
     suspend fun getFavoriteById(id: Int): FavoriteEntity
     suspend fun getAllFavoritesByUser(userId: Int): List<FavoriteEntity>
-    suspend fun deleteFavorite(adId: Int)
+    suspend fun deleteFavorite(id: Int)
+
+    suspend fun deleteFavoriteByAdId(adId : Int)
 }
 
 class FavoriteRepositoryImpl : FavoriteRepository {
@@ -31,9 +33,15 @@ class FavoriteRepositoryImpl : FavoriteRepository {
             FavoriteEntity.find { FavoriteTable.user eq user.id }.toList()
         }
 
-    override suspend fun deleteFavorite(adId: Int) =
+    override suspend fun deleteFavorite(id: Int) =
         newSuspendedTransaction {
-            FavoriteEntity.findById(adId)?.let(FavoriteEntity::delete) ?: throw Exception()
+            FavoriteEntity.findById(id)?.let(FavoriteEntity::delete) ?: throw Exception()
+        }
+
+    override suspend fun deleteFavoriteByAdId(adId: Int) =
+        newSuspendedTransaction {
+            val favorites = FavoriteEntity.find { FavoriteTable.ad eq adId }
+            favorites.forEach(FavoriteEntity::delete)
         }
 
 }

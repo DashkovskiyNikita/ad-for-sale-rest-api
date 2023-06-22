@@ -48,6 +48,9 @@ data class TokenResponse(
 @Resource("/user")
 class User {
 
+    @Resource("info")
+    class Info(val user: User = User())
+
     @Resource("login")
     class Login(val user: User = User())
 
@@ -82,7 +85,7 @@ fun Route.authRouting() {
 
         if (decryptedPwd == request.password) {
             val access = JwtUtils.generate(config = accessConfig, "id" to user.id.value)
-            val refresh = JwtUtils.generate(config = refreshConfig)
+            val refresh = JwtUtils.generate(config = refreshConfig, "id" to user.id.value)
             val response = TokenResponse(access = access, refresh = refresh)
             call.respond(HttpStatusCode.OK, response)
         } else {
@@ -100,7 +103,7 @@ fun Route.authRouting() {
             val newUserId = authRepository.insertUser(userWithHashedPwd)
 
             val access = JwtUtils.generate(config = accessConfig, "id" to newUserId)
-            val refresh = JwtUtils.generate(config = refreshConfig)
+            val refresh = JwtUtils.generate(config = refreshConfig,"id" to newUserId)
 
             val response = TokenResponse(access = access, refresh = refresh)
             call.respond(HttpStatusCode.OK, response)
@@ -116,7 +119,10 @@ fun Route.authRouting() {
                 config = accessConfig,
                 "id" to principal.payload.getClaim("id").asInt()
             )
-            val refresh = JwtUtils.generate(config = refreshConfig)
+            val refresh = JwtUtils.generate(
+                config = refreshConfig,
+                "id" to principal.payload.getClaim("id").asInt()
+            )
             val response = TokenResponse(access = access, refresh = refresh)
             call.respond(HttpStatusCode.OK, response)
         }
@@ -128,6 +134,11 @@ fun Route.authRouting() {
                 request = request
             )
             call.respond(HttpStatusCode.OK)
+        }
+        get<User.Info>{
+            val principal = call.getPrincipalOrThrow()
+            val user = authRepository.getUserById(id = principal.payload.getClaim("id").asInt())
+            call.respond(HttpStatusCode.OK,user)
         }
         delete<User.Delete> {
             val principal = call.getPrincipalOrThrow()

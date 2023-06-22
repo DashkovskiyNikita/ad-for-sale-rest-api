@@ -1,5 +1,6 @@
 package com.example.tables
 
+import com.example.routes.UserInfoResponse
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
@@ -22,3 +23,10 @@ class UserEntity(id: EntityID<Int>) : IntEntity(id) {
     var phone by UserTable.phone
     var email by UserTable.email
 }
+
+fun UserEntity.mapToUserInfo() = UserInfoResponse(
+    name = name,
+    surname = surname,
+    phone = phone,
+    email = email
+)

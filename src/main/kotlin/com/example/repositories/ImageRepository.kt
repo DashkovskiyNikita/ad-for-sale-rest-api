@@ -14,12 +14,10 @@ interface ImageRepository {
     suspend fun getAllImagesByAd(adId: Int): List<ImageEntity>
 }
 
-class ImageRepositoryImpl(
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
-) : ImageRepository {
+class ImageRepositoryImpl : ImageRepository {
 
     override suspend fun insertImage(adId: Int, fileName: String) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             ImageEntity.new {
                 ad = AdEntity.findById(adId) ?: throw Exception()
                 this.fileName = fileName
@@ -27,12 +25,12 @@ class ImageRepositoryImpl(
         }
 
     override suspend fun getImageById(id: Int) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             ImageEntity.findById(id) ?: throw Exception()
         }
 
     override suspend fun deleteImageById(id: Int) =
-        newSuspendedTransaction(dispatcher) {
+        newSuspendedTransaction {
             ImageEntity.findById(id)?.let(ImageEntity::delete) ?: throw Exception()
         }
 
